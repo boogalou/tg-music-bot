@@ -1,9 +1,5 @@
 import { botInit } from "./bot";
 
-
-
-
-
 async function main() {
   try {
     await botInit().launch()
