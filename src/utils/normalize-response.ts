@@ -6,7 +6,6 @@ export function normalizeResponse(items: Track[]): Tracklist[]{
     if (!track.url) {
       return null;
     }
-
     return {
       url: track.url,
       filename: `${track.artist} - ${track.title}`,

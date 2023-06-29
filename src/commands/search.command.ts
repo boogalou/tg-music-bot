@@ -29,9 +29,6 @@ export class SearchCommand extends Command {
   }
 
   handle(): void {
-
-    console.log(this.state);
-
     try {
       this.bot.command('search', async (ctx) => {
         await ctx.reply('Enter your request');
@@ -56,8 +53,6 @@ export class SearchCommand extends Command {
                 Markup.button.callback(`${i + 1}`, `${i}`)
             )
           }
-          ;
-
 
           const replyOptions = Markup.inlineKeyboard(inlineMessageRatingKeyboard);
 
