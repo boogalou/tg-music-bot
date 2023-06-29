@@ -15,7 +15,7 @@ export class Bot {
       private readonly logger: LoggerService,
   ) {
     this.bot = new Telegraf<Scenes.SceneContext>(
-        this.configService.get(process.env.NODE_ENV === 'production' ? 'BOT_TOKEN_PROD' : 'BOT_TOKEN_DEV'));
+        process.env.NODE_ENV === 'production' ? 'BOT_TOKEN_PROD' : 'BOT_TOKEN_DEV');
     this.bot.use(session());
   };
 
