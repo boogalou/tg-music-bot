@@ -1,6 +1,4 @@
-import {IConfigService} from "./config/config.interface";
 import {Scenes, session, Telegraf} from "telegraf";
-import {IBotContext} from "./context/context.interface";
 import {Command} from "./commands/command.class";
 import {StartCommand} from "./commands/start.command";
 import {SearchCommand} from "./commands/search.command";
@@ -12,17 +10,20 @@ export class Bot {
   apiKey: string | undefined;
 
   constructor(
-      private readonly configService: IConfigService,
       private readonly logger: LoggerService,
   ) {
-    this.apiKey = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN_PROD : process.env.BOT_TOKEN_DEV
-    if (this.apiKey)
-    this.bot = new Telegraf<Scenes.SceneContext>(this.apiKey);
+    this.apiKey = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN_PROD : process.env.BOT_TOKEN_DEV;
+    if (this.apiKey) {
+      this.bot = new Telegraf<Scenes.SceneContext>(this.apiKey);
+    }
     this.bot.use(session());
   };
 
   init() {
-    this.commands = [new StartCommand(this.bot, this.logger), new SearchCommand(this.bot, this.logger)];
+    this.commands = [
+      new StartCommand(this.bot, this.logger),
+      new SearchCommand(this.bot, this.logger),
+    ];
 
     for (const command of this.commands) {
       command.handle();
