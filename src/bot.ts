@@ -1,30 +1,35 @@
-import { Scenes, session, Telegraf } from "telegraf";
-import 'dotenv/config';
-import { start } from "./commands";
-import { getSearch } from "./services/apiService";
+import {IConfigService} from "./config/config.interface";
+import {Scenes, session, Telegraf} from "telegraf";
+import {IBotContext} from "./context/context.interface";
+import {Command} from "./commands/command.class";
+import {StartCommand} from "./commands/start.command";
+import {SearchCommand} from "./commands/search.command";
+import {LoggerService} from "./services/logger.service";
 
+export class Bot {
+  bot: Telegraf<Scenes.SceneContext>;
+  commands: Command[] = [];
 
-const bot = new Telegraf<Scenes.SceneContext>(process.env.BOT_TOKEN!);
-const stage = new Scenes.Stage<Scenes.SceneContext>();
+  constructor(
+      private readonly configService: IConfigService,
+      private readonly logger: LoggerService,
+  ) {
+    this.bot = new Telegraf<Scenes.SceneContext>(
+        this.configService.get(process.env.NODE_ENV === 'production' ? 'BOT_TOKEN_PROD' : 'BOT_TOKEN_DEV'));
+    this.bot.use(session());
+  };
 
+  init() {
+    this.commands = [new StartCommand(this.bot, this.logger), new SearchCommand(this.bot, this.logger)];
 
-export function botInit() {
-  bot.use(session());
-  bot.use(stage.middleware());
+    for (const command of this.commands) {
+      command.handle();
+    }
 
-  bot.use((ctx, next) => next());
-
-  bot.start(start);
-
-  bot.on('text', async (ctx) => {
-    const req = await ctx.message.text;
-    const response = await getSearch(req);
-    const { items } = response.data.response
-
-    await ctx.replyWithAudio(items[0].url, { caption: `${items[0].artist} - ${items[0].title}` })
-    await ctx.replyWithAudio(items[1].url, { caption: `${items[1].artist} - ${items[1].title}` })
-    await ctx.replyWithAudio(items[2].url, { caption: `${items[2].artist} - ${items[2].title}` })
-  })
-
-  return bot;
+    this.bot.launch()
+    this.logger.info(`bot was launched successfully in ${
+        process.env.NODE_ENV === 'production'
+            ? 'production'
+            : 'development'} mode`);
+  }
 }

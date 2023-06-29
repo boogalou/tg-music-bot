@@ -1,11 +1,14 @@
-import { botInit } from "./bot";
+import { Bot } from "./bot";
+import { ConfigService } from "./config/config.service";
+import { LoggerService } from "./services/logger.service";
 
 async function main() {
   try {
-    await botInit().launch()
+    const bot = new Bot(new ConfigService(), new LoggerService());
+    bot.init();
   } catch (err) {
     console.error(err)
   }
 }
 
-main().then(() => console.log("bot started successfully"));
+main();
