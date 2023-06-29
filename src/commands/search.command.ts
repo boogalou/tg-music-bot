@@ -30,7 +30,7 @@ export class SearchCommand extends Command {
 
   handle(): void {
     try {
-      this.bot.command('search', async (ctx) => {
+      this.bot.command('find', async (ctx) => {
         await ctx.reply('Enter your request');
         await this.bot.on(message('text'), async (ctx) => {
           const searchRequest = ctx.message.text;
