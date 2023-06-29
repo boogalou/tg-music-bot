@@ -1,64 +1,81 @@
 import {message} from "telegraf/filters";
 import {Markup, Scenes, Telegraf} from "telegraf";
 import {Command} from "./command.class";
-import {IBotContext} from "../context/context.interface";
 import {AxiosResponse} from "axios";
 import {ResponseData} from "../types/response.interface";
 import {getLyricsGenius, search, searchYouTube} from "../services/api.service";
 import {normalizeResponse} from "../utils/normalize-response";
 import {LoggerService} from "../services/logger.service";
 import {listFormatting} from "../utils/list-formatting";
+import {Tracklist} from "../types/tracklist.interface";
 
 export class SearchCommand extends Command {
+  state: {
+    tracks: Tracklist[],
+    searchRequest: string,
+    selectedTrackIndex: number
+  }
+
   constructor(
       bot: Telegraf<Scenes.SceneContext>,
       private readonly logger: LoggerService,
   ) {
     super(bot);
+    this.state = {
+      tracks: [],
+      searchRequest: '',
+      selectedTrackIndex: -1,
+    }
   }
 
   handle(): void {
+
+    console.log(this.state);
+
     try {
       this.bot.command('search', async (ctx) => {
         await ctx.reply('Enter your request');
         await this.bot.on(message('text'), async (ctx) => {
           const searchRequest = ctx.message.text;
+          this.state.searchRequest = ctx.message.text
           const searchResponse: AxiosResponse<ResponseData> = await search(searchRequest);
+          const items = searchResponse.data.response.items;
 
-          if (!searchResponse.data) {
-            await ctx.replyWithHTML('<pre>404 text not found</pre>');
-            return '';
+          if (items.length <= 0) {
+            await ctx.replyWithHTML('<pre>No results found</pre>');
+            return;
           }
 
-          const tracks = normalizeResponse(searchResponse.data);
-          const trackList = listFormatting(tracks);
+          this.state.tracks = normalizeResponse(items);
+          const trackList = listFormatting(this.state.tracks);
 
           const inlineMessageRatingKeyboard: any[] = [];
 
-          for (let i = 0; i < tracks.length; i++) {
+          for (let i = 0; i < this.state.tracks.length; i++) {
             inlineMessageRatingKeyboard.push(
-                Markup.button.callback(`${i + 1}`, `${i + 1}`)
-            );
-          };
+                Markup.button.callback(`${i + 1}`, `${i}`)
+            )
+          }
+          ;
+
 
           const replyOptions = Markup.inlineKeyboard(inlineMessageRatingKeyboard);
 
           await ctx.replyWithHTML(trackList, replyOptions);
-          await this.bot.action(['1', '2', '3'], async (ctx) => {
+          await this.bot.action(inlineMessageRatingKeyboard.map((_, index) => String(index)), async (ctx) => {
             const trackIndex = Number(ctx.match.at(0));
-            console.log(trackIndex)
+            this.state.selectedTrackIndex = trackIndex;
 
-            await ctx.replyWithAudio(tracks[trackIndex], Markup.inlineKeyboard([
-                  Markup.button.callback('YouTube', `YouTube-${trackIndex}`),
-                  Markup.button.callback('Song Lyrics', `Lyrics-${trackIndex}`),
+            await ctx.replyWithAudio(this.state.tracks[this.state.selectedTrackIndex], Markup.inlineKeyboard([
+                  Markup.button.callback('YouTube', `YouTube-${this.state.selectedTrackIndex}`),
+                  Markup.button.callback('Song Lyrics', `Lyrics-${this.state.selectedTrackIndex}`),
                 ]
             ));
 
-            this.bot.action(`YouTube-${trackIndex}`, async (ctx) => {
-              const result = ctx.match.at(0)?.split('-').at(1);
-              if (result) {
-                console.log(result);
-                const response = await searchYouTube(tracks[+result].filename)
+            this.bot.action(`YouTube-${this.state.selectedTrackIndex}`, async (ctx) => {
+              const selectedTrackIndex = this.state.selectedTrackIndex;
+              if (selectedTrackIndex) {
+                const response = await searchYouTube(this.state.tracks[selectedTrackIndex].filename)
                 const videoId = await response.data.items[0]['id']['videoId']
                 if (!videoId) {
                   await ctx.replyWithHTML('<pre>404 video not found</pre>');
@@ -68,10 +85,10 @@ export class SearchCommand extends Command {
               }
             });
             this.bot.action(`Lyrics-${trackIndex}`, async (ctx) => {
-              const result = ctx.match.at(0)?.split('-').at(1);
-              const lyrics = await getLyricsGenius(tracks[+result!].filename);
+              const selectedTrackIndex = this.state.selectedTrackIndex;
+              const lyrics = await getLyricsGenius(this.state.tracks[selectedTrackIndex].filename);
               if (!lyrics) {
-                await ctx.replyWithHTML('<pre>404 text not found</pre>');
+                await ctx.replyWithHTML('<pre>404 text not found</pre>')
                 return;
               }
               await ctx.replyWithHTML(`<pre>${lyrics}</pre>`);

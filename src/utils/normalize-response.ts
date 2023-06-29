@@ -1,11 +1,7 @@
-import {ResponseData} from '../types/response.interface';
+import {Track} from '../types/response.interface';
 import {Tracklist} from "../types/tracklist.interface";
 
-export function normalizeResponse({ response }: ResponseData): Tracklist[]{
-  const { items } = response;
-
-  console.log(items)
-
+export function normalizeResponse(items: Track[]): Tracklist[]{
   const tracks = items.map((track) => {
     if (!track.url) {
       return null;
