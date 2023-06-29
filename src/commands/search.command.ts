@@ -68,9 +68,9 @@ export class SearchCommand extends Command {
             ));
 
             this.bot.action(`YouTube-${this.state.selectedTrackIndex}`, async (ctx) => {
-              const selectedTrackIndex = this.state.selectedTrackIndex;
+              const selectedTrackIndex = ctx.match.at(0)?.split('-').at(1);
               if (selectedTrackIndex) {
-                const response = await searchYouTube(this.state.tracks[selectedTrackIndex].filename)
+                const response = await searchYouTube(this.state.tracks[+selectedTrackIndex].filename);
                 const videoId = await response.data.items[0]['id']['videoId']
                 if (!videoId) {
                   await ctx.replyWithHTML('<pre>404 video not found</pre>');
@@ -79,17 +79,18 @@ export class SearchCommand extends Command {
                 await ctx.reply('https://www.youtube.com/watch?v=' + videoId);
               }
             });
-            this.bot.action(`Lyrics-${trackIndex}`, async (ctx) => {
-              const selectedTrackIndex = this.state.selectedTrackIndex;
-              const lyrics = await getLyricsGenius(this.state.tracks[selectedTrackIndex].filename);
+            this.bot.action(`Lyrics-${this.state.selectedTrackIndex}`, async (ctx) => {
+              const selectedTrackIndex = ctx.match.at(0)?.split('-').at(1);
+              if (selectedTrackIndex) {
+                const lyrics = await getLyricsGenius(this.state.tracks[+selectedTrackIndex].filename);
+                await ctx.replyWithHTML(`<pre>${lyrics}</pre>`);
+
               if (!lyrics) {
                 await ctx.replyWithHTML('<pre>404 text not found</pre>')
                 return;
-              }
-              await ctx.replyWithHTML(`<pre>${lyrics}</pre>`);
-            });
+              }}
+            })
           });
-
         })
       });
     } catch (error) {
