@@ -50,7 +50,6 @@ export const search = async (request: string): Promise<AxiosResponse> => {
 
 export const searchYouTube = async (request: string): Promise<AxiosResponse> => {
   const url = 'https://www.googleapis.com/youtube/v3/search';
-  console.log(request);
   try {
     return await axios.get(url, {
       params: {
@@ -63,7 +62,6 @@ export const searchYouTube = async (request: string): Promise<AxiosResponse> => 
     });
   } catch (error) {
     console.error(error);
-    console.error(error)
     throw new Error('youtube api error');
   }
 };
