@@ -9,13 +9,15 @@ import {LoggerService} from "./services/logger.service";
 export class Bot {
   bot: Telegraf<Scenes.SceneContext>;
   commands: Command[] = [];
+  apiKey: string | undefined;
 
   constructor(
       private readonly configService: IConfigService,
       private readonly logger: LoggerService,
   ) {
-    this.bot = new Telegraf<Scenes.SceneContext>(
-        process.env.NODE_ENV === 'production' ? 'BOT_TOKEN_PROD' : 'BOT_TOKEN_DEV');
+    this.apiKey = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN_PROD : process.env.BOT_TOKEN_DEV
+    if (this.apiKey)
+    this.bot = new Telegraf<Scenes.SceneContext>(this.apiKey);
     this.bot.use(session());
   };
 
