@@ -1,8 +1,6 @@
 import "dotenv/config"
 import axios, {AxiosResponse} from "axios";
 
-// @ts-ignore
-import {getLyrics, getSong} from 'genius-lyrics-api';
 import {ResponseData} from "../types/response.interface";
 
 
@@ -66,16 +64,37 @@ export const searchYouTube = async (request: string): Promise<AxiosResponse> => 
   }
 };
 
-export const getLyricsGenius = async (request: string) => {
-  try {
-    const options = {
-      apiKey: process.env.GENIUS_TOKEN,
-      title: request,
-      artist: request,
-      optimizeQuery: true,
+export const findLyrics = async (trackId: string) => {
+  const url = 'http://api.musixmatch.com/ws/1.1/';
+  const apiKey: string | undefined = process.env.MUSIXMATCH_TOKEN;
+  return await axios.get(url + `track.lyrics.get`, {
+    params: {
+      track_id: trackId,
+      apikey: apiKey,
     }
+  })
+}
 
-    return await getLyrics(options)
+export const getLyrics = async (request: string) => {
+  const url = 'http://api.musixmatch.com/ws/1.1/'
+  const apiKey: string | undefined = process.env.MUSIXMATCH_TOKEN;
+  try {
+    const response: AxiosResponse = await axios.get(url + 'track.search', {
+      params: {
+        q: request,
+        apikey: apiKey,
+      }
+    });
+
+    const data = await response.data;
+
+    if (data['message']['header'].status_code !== 200) {
+      return undefined;
+    }
+    const trackId = data['message']['body']['track_list'][0]['track']['track_id'];
+    const result = await findLyrics(trackId);
+    const lyrics = result.data['message']['body']['lyrics']['lyrics_body'];
+    return lyrics;
   } catch (error) {
     console.error(error);
     throw new Error('lyrics api error');

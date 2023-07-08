@@ -16,7 +16,10 @@ export class Bot {
     if (this.apiKey) {
       this.bot = new Telegraf<Scenes.SceneContext>(this.apiKey);
     }
-    this.bot.use(session());
+
+    if (this.bot) {
+      this.bot.use(session());
+    }
   };
 
   init() {

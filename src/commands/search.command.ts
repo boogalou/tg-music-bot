@@ -3,7 +3,7 @@ import {Markup, Scenes, Telegraf} from "telegraf";
 import {Command} from "./command.class";
 import {AxiosResponse} from "axios";
 import {ResponseData} from "../types/response.interface";
-import {getLyricsGenius, search, searchYouTube} from "../services/api.service";
+import {getLyrics, search, searchYouTube} from "../services/api.service";
 import {normalizeResponse} from "../utils/normalize-response";
 import {LoggerService} from "../services/logger.service";
 import {listFormatting} from "../utils/list-formatting";
@@ -81,7 +81,9 @@ export class SearchCommand extends Command {
             });
             this.bot.action(`Lyrics-${this.state.selectedTrackIndex}`, async (ctx) => {
               const selectedTrackIndex = ctx.match.at(0)?.split('-').at(1);
-              const lyrics = await getLyricsGenius(this.state.tracks[+selectedTrackIndex!].filename);
+              const lyrics = await getLyrics(this.state.tracks[+selectedTrackIndex!].filename);
+
+              // @ts-ignore
               if (!lyrics) {
                 await ctx.replyWithHTML('<pre>404 text not found</pre>')
                 return;
