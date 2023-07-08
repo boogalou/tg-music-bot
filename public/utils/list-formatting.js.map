@@ -1,1 +1,0 @@
-{"version":3,"file":"list-formatting.js","sourceRoot":"","sources":["../../src/utils/list-formatting.ts"],"names":[],"mappings":";;;AAGA,SAAgB,cAAc,CAAC,IAAiB;IAC9C,OAAO,IAAI,CAAC,GAAG,CAAC,CAAC,KAAK,EAAE,KAAK,EAAE,EAAE,CAAC,CAC9B,WAAW,EAAE,KAAK,KAAK,KAAK,aAAL,KAAK,uBAAL,KAAK,CAAE,QAAQ,aAAa,CACtD,CAAC,CAAC,IAAI,CAAC,EAAE,CAAC,CAAC;AACd,CAAC;AAJD,wCAIC;AAAA,CAAC"}

@@ -1,7 +1,7 @@
 import {Bot} from "./bot";
 import {LoggerService} from "./services/logger.service";
 
-async function main() {
+export async function main() {
   try {
     const bot = new Bot(new LoggerService());
     bot.init();
