@@ -58,7 +58,7 @@ export class SearchCommand extends Command {
 
           await ctx.replyWithHTML(trackList, replyOptions);
           await this.bot.action(inlineMessageRatingKeyboard.map((_, index) => String(index)), async (ctx) => {
-            const trackIndex = Number(ctx.match.at(0));
+            const trackIndex = Number(ctx.match[0]);
             this.state.selectedTrackIndex = trackIndex;
 
             await ctx.replyWithAudio(this.state.tracks[this.state.selectedTrackIndex], Markup.inlineKeyboard([
@@ -68,7 +68,7 @@ export class SearchCommand extends Command {
             ));
 
             this.bot.action(`YouTube-${this.state.selectedTrackIndex}`, async (ctx) => {
-              const selectedTrackIndex = ctx.match.at(0)?.split('-').at(1);
+              const selectedTrackIndex = ctx.match[0]?.split('-')[1];
 
               const response = await searchYouTube(this.state.tracks[+selectedTrackIndex!].filename);
               const videoId = await response.data.items[0]['id']['videoId']
@@ -80,7 +80,7 @@ export class SearchCommand extends Command {
               await ctx.reply('https://www.youtube.com/watch?v=' + videoId);
             });
             this.bot.action(`Lyrics-${this.state.selectedTrackIndex}`, async (ctx) => {
-              const selectedTrackIndex = ctx.match.at(0)?.split('-').at(1);
+              const selectedTrackIndex = ctx.match[0]?.split('-')[1];
               const lyrics = await getLyrics(this.state.tracks[+selectedTrackIndex!].filename);
 
               // @ts-ignore
