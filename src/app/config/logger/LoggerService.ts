@@ -1,16 +1,20 @@
+import { injectable } from "inversify";
 import winston, { Logger } from 'winston';
+import { ILogger } from "./ILogger";
 
-export class LoggerService {
+
+@injectable()
+export class LoggerService implements ILogger {
   logger: Logger;
 
   constructor() {
     this.logger = winston.createLogger({
       level: 'info',
       format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.errors({ stack: true }),
-          winston.format.splat(),
-          winston.format.json()
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.splat(),
+        winston.format.json()
       ),
       transports: [
         new winston.transports.File({ filename: 'error.log', level: 'error' }),

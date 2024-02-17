@@ -1,7 +1,7 @@
-import {Track} from '../types/response.interface';
+import {TrackItem} from '../domain/entities/IAudioTrackResponse';
 import {Tracklist} from "../types/tracklist.interface";
 
-export function normalizeResponse(items: Track[]): Tracklist[]{
+export function normalizeResponse(items: TrackItem[]): Tracklist[]{
   const tracks = items.map((track) => {
     if (!track.url) {
       return null;

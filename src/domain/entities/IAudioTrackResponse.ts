@@ -1,14 +1,14 @@
-export interface ResponseData {
-    response: TrackData
+export interface IAudioTrackResponse {
+    response: AudiTrackData
 }
 
-interface TrackData {
+interface AudiTrackData {
     count: number
-    items: Track[]
+    items: TrackItem[]
 }
 
 
-export interface Track {
+export interface TrackItem {
     artist: string;
     id: number;
     owner_id: number;
