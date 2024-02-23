@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../app/di/types";
 import { ILogger } from "../../app/config/logger/ILogger";

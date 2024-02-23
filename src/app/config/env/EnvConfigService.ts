@@ -13,7 +13,7 @@ export class EnvConfigService implements IEnvConfigService {
   ) {
     const {error, parsed} = config();
     if (error || !parsed) {
-      const errorMessage: string = 'env file not found or empty';
+      const errorMessage: string = '.env file not found or empty';
       this.logger.error(errorMessage);
       throw new Error(errorMessage);
     }

@@ -1,6 +1,6 @@
-export interface ILogger {
+import { Logger } from "winston";
 
-  logger: unknown;
+export interface ILogger {
 
   info: (message: any, ...meta: unknown[]) => void;
 

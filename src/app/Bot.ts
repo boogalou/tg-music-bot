@@ -14,6 +14,7 @@ export class Bot {
   bot: Telegraf<Scenes.SceneContext>;
   commands: Command[] = [];
   apiKey: string | undefined;
+
   constructor(
    @inject(TYPES.ILogger) private readonly logger: ILogger,
    @inject(TYPES.IConfigService) private readonly configService: IEnvConfigService,
@@ -28,7 +29,7 @@ export class Bot {
     } else {
       const errorMessage: string = 'Bot token not found in configuration.';
       this.logger.error(errorMessage);
-      throw Error(errorMessage);
+      // throw Error(errorMessage);
     }
 
     if (this.bot) {
