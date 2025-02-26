@@ -9,20 +9,21 @@
     "build": "tsc"
   },
   "dependencies": {
-    "axios": "^1.6.7",
-    "chalk": "^4.1.2",
+    "axios": "^1.7.9",
+    "boxen": "5.1.2",
+    "chalk": "4.1.2",
     "cross-env": "^7.0.3",
-    "dotenv": "^16.4.5",
-    "inversify": "^6.0.2",
-    "reflect-metadata": "^0.2.1",
-    "telegraf": "^4.15.3",
-    "vk-io": "^4.9.1"
+    "dotenv": "^16.4.7",
+    "inversify": "^6.2.2",
+    "reflect-metadata": "^0.2.2",
+    "telegraf": "^4.16.3",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.20",
-    "nodemon": "^3.1.0",
+    "@types/node": "^22.13.5",
+    "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
-    "winston": "^3.11.0"
-  }
+    "typescript": "^5.7.3"
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }
