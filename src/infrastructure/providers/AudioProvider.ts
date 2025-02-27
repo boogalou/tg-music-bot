@@ -1,15 +1,15 @@
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from "axios";
 import { inject, injectable } from "inversify";
 
-import { IAudioTrackResponse } from "../../../domain/models/IAudioTrackResponse";
-import { TYPES } from "../../../di/types";
-import { ILogger } from "../config/logger/ILogger";
-import { IEnvConfigService } from "../config/env/IEnvConfigService";
-import { IVKMusicService } from "../IVKMusicService";
-import { Track } from "../../../domain/models/Track";
+import { IAudioTrackResponse } from "../../domain/models/IAudioTrackResponse";
+import { TYPES } from "../../di/types";
+import { ILogger } from "../services/config/logger/ILogger";
+import { IEnvConfigService } from "../services/config/env/IEnvConfigService";
+import { Track } from "../../domain/models/Track";
+import { IAudioProvider } from "../../domain/repositories/IAudioProvider";
 
 @injectable()
-export class VKMusicService implements IVKMusicService {
+export class AudioProvider implements IAudioProvider {
   private vk: AxiosInstance;
 
   constructor(
@@ -31,7 +31,7 @@ export class VKMusicService implements IVKMusicService {
     });
   }
 
-  async searchAudioTrack(trackTitle: string): Promise<Track[]> {
+  async getMusicTrack(trackTitle: string): Promise<Track[]> {
     try {
       const response: AxiosResponse<IAudioTrackResponse> = await this.vk.get('/audio.search', {
         params: {

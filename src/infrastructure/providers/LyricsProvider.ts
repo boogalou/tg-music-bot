@@ -1,17 +1,17 @@
 import { inject, injectable } from "inversify";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { IMusixmatchLyricsService } from "../IMusixmatchLyricsService";
-import { TYPES } from "../../../di/types";
-import { IEnvConfigService } from "../config/env/IEnvConfigService";
-import { ILogger } from "../config/logger/ILogger";
+import { TYPES } from "../../di/types";
+import { IEnvConfigService } from "../services/config/env/IEnvConfigService";
+import { ILogger } from "../services/config/logger/ILogger";
 
 import {
   MusixmatchApiResponseTrack,
   MusixmatchApiResponseTrackLyrics
-} from "../../../domain/models/IMusixmatchResponse";
+} from "../../domain/models/IMusixmatchResponse";
+import { ILyricsProvider } from "../../domain/repositories/ILyricsProvider";
 
 @injectable()
-export class MusixmatchLyricsService implements IMusixmatchLyricsService{
+export class LyricsProvider implements ILyricsProvider{
   private musixmatch: AxiosInstance;
 
   constructor(
@@ -29,20 +29,22 @@ export class MusixmatchLyricsService implements IMusixmatchLyricsService{
     });
   }
 
+  public async getLyrics(trackTitle: string): Promise<string> {
+    return await this.findTrackByTitle(trackTitle);
+  }
 
-  async searchLyrics(trackTitle: string): Promise<string> {
-    console.log('TRACK_TITLE: ', trackTitle)
+  private async findTrackByTitle(trackTitle: string): Promise<string> {
     const response: AxiosResponse<MusixmatchApiResponseTrack> = await this.musixmatch.get('/track.search', {
       params: { q: trackTitle }
     })
-    console.log(response.data.message.body.track_list[0].track)
+
     const trackId = response.data.message.body.track_list[0].track.track_id;
 
-    return await this.getLyrics(trackId);
+    return await this.getLyricsById(trackId);
 
   }
 
-  private async getLyrics(trackId: number): Promise<string>  {
+  private async getLyricsById(trackId: number): Promise<string>  {
     try {
       const response: AxiosResponse<MusixmatchApiResponseTrackLyrics> = await this.musixmatch.get('/track.lyrics.get', {
         params: { track_id: trackId }

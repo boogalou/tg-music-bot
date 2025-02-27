@@ -2,10 +2,10 @@ import { Scenes, session, Telegraf } from "telegraf";
 import { inject, injectable } from "inversify";
 import 'reflect-metadata';
 
-import { TYPES } from "../../../di/types";
-import { ILogger } from "../config/logger/ILogger";
-import { IEnvConfigService } from "../config/env/IEnvConfigService";
-import { BotService } from "../../../application/services/BotService";
+import { TYPES } from "../../di/types";
+import { ILogger } from "./config/logger/ILogger";
+import { IEnvConfigService } from "./config/env/IEnvConfigService";
+import { BotService } from "../../application/services/BotService";
 
 @injectable()
 export class Bot {

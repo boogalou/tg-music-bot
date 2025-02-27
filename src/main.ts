@@ -1,4 +1,4 @@
-import { Bot } from "./infrastructure/services/impl/Bot";
+import { Bot } from "./infrastructure/services/Bot";
 import { container } from "./di/container";
 import { TYPES } from "./di/types";
 

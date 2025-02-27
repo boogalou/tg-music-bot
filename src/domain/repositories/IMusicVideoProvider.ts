@@ -1,3 +1,3 @@
-export interface IVideoProvider {
+export interface IMusicVideoProvider {
   getMusicVideo: (trackTitle: string) => Promise<string>;
 }

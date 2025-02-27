@@ -1,12 +1,16 @@
-import { TrackTitle } from "../../domain/models/TrackTitle";
-import { TrackLyrics } from "../../domain/models/TrackLyrics";
+import { inject, injectable } from "inversify";
+
 import { ILyricsProvider } from "../../domain/repositories/ILyricsProvider";
+import { IGetLyricsUseCase } from "../interfaces/IGetLyricsUseCase";
+import { TYPES } from "../../di/types";
 
+@injectable()
+export class GetLyricsUseCase implements IGetLyricsUseCase {
+  constructor(
+    @inject(TYPES.LyricsProvider)
+    private readonly provider: ILyricsProvider) {}
 
-export class GetLyricsUseCase {
-  constructor(private readonly repository: ILyricsProvider) {}
-
-   async execute(trackTitle: TrackTitle): Promise<TrackLyrics> {
-     return await this.repository.getLyrics(trackTitle);
+   async execute(trackTitle: string): Promise<string> {
+     return await this.provider.getLyrics(trackTitle);
   }
 }

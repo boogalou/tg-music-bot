@@ -1,19 +1,19 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 
-import { TrackTitle } from "../../domain/models/TrackTitle";
-import { VideoId } from "../../domain/models/VideoId";
-import { IVideoProvider } from "../../domain/repositories/IVideoProvider";
+import { IMusicVideoProvider } from "../../domain/repositories/IMusicVideoProvider";
+import { TYPES } from "../../di/types";
+import { IGetMusicVideoUseCase } from "../interfaces/IGetMusicVideoUseCase";
 
 
 @injectable()
-export class GetMusicVideoUseCase {
-
+export class GetMusicVideoUseCase implements IGetMusicVideoUseCase{
   constructor(
-
-    private readonly repository: IVideoProvider) {
+    @inject(TYPES.MusicVideoProvider)
+    private readonly provider: IMusicVideoProvider
+  ) {
   }
 
- async execute(trackTitle: TrackTitle): Promise<VideoId> {
-    return await this.repository.getMusicVideo(trackTitle);
+ async execute(trackTitle: string): Promise<string> {
+    return await this.provider.getMusicVideo(trackTitle);
   }
 }

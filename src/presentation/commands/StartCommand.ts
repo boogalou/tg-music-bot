@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { SceneContext } from "telegraf/typings/scenes";
 import { Telegraf } from "telegraf";
 
-import { ICommand } from "../../domain/commands/ICommand";
+import { ICommand } from "../interfaces/ICommand";
 import { TYPES } from "../../di/types";
 import { ILogger } from "../../infrastructure/services/config/logger/ILogger";
 

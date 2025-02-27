@@ -1,5 +1,3 @@
-import { Logger } from "winston";
-
 export interface ILogger {
 
   info: (message: any, ...meta: unknown[]) => void;
