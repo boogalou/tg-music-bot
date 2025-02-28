@@ -24,15 +24,15 @@ export class MusicVideoProvider implements IMusicVideoProvider {
   }
 
   async getMusicVideo(trackTitle: string): Promise<string> {
+    console.log('getMusicVideo: ', trackTitle)
     const response = await this.youtube.get('/search', {
       params: {
-        part: 'snipet',
+        q: trackTitle,
+        part: 'snippet',
         type: 'video',
         maxResults: 10,
-        q: trackTitle
       }
     });
-    console.log(response.data[0].id.videoId)
     return response.data.items[0].id.videoId;
   }
 }
