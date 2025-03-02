@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "boxen": "5.1.2",
     "chalk": "4.1.2",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",

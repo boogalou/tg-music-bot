@@ -1,20 +1,22 @@
-import { Scenes, session, Telegraf } from "telegraf";
+import { session, Telegraf } from "telegraf";
 import { inject, injectable } from "inversify";
 import 'reflect-metadata';
 
 import { TYPES } from "../../di/types";
-import { ILogger } from "./config/logger/ILogger";
-import { IEnvConfigService } from "./config/env/IEnvConfigService";
-import { BotService } from "../../application/services/BotService";
+import { ILogger } from "../interfaces/ILogger";
+import { IEnvConfigService } from "../interfaces/IEnvConfigService";
+import { IBotContext } from "../interfaces/IBotContext";
+import { IBotService } from "../interfaces/IBotService";
+import { IBot } from "../interfaces/IBot";
 
 @injectable()
-export class Bot {
-  bot: Telegraf<Scenes.SceneContext>;
+export class Bot implements IBot {
+  bot: Telegraf<IBotContext>;
 
   constructor(
     @inject(TYPES.ILogger) private readonly logger: ILogger,
     @inject(TYPES.IConfigService) private readonly configService: IEnvConfigService,
-    @inject(TYPES.BotService) private readonly botService: BotService
+    @inject(TYPES.IBotService) private readonly botService: IBotService,
   ) {
     const botToken = process.env.NODE_ENV === 'production'
       ? this.configService.get('BOT_TOKEN_PROD')
@@ -26,9 +28,8 @@ export class Bot {
       throw new Error(errorMessage);
     }
 
-    this.bot = new Telegraf<Scenes.SceneContext>(botToken);
+    this.bot = new Telegraf<IBotContext>(botToken);
     this.bot.use(session());
-
   }
 
   public async init() {

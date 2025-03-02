@@ -8,7 +8,7 @@ import { IGetMusicVideoUseCase } from "../interfaces/IGetMusicVideoUseCase";
 @injectable()
 export class GetMusicVideoUseCase implements IGetMusicVideoUseCase{
   constructor(
-    @inject(TYPES.MusicVideoProvider)
+    @inject(TYPES.IMusicVideoProvider)
     private readonly provider: IMusicVideoProvider
   ) {
   }

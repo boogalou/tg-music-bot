@@ -1,10 +1,10 @@
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from "axios";
 import { inject, injectable } from "inversify";
 
-import { IAudioTrackResponse } from "../../domain/models/IAudioTrackResponse";
+import { IAudioTrackResponse } from "../types/IAudioTrackResponse";
 import { TYPES } from "../../di/types";
-import { ILogger } from "../services/config/logger/ILogger";
-import { IEnvConfigService } from "../services/config/env/IEnvConfigService";
+import { ILogger } from "../interfaces/ILogger";
+import { IEnvConfigService } from "../interfaces/IEnvConfigService";
 import { Track } from "../../domain/models/Track";
 import { IAudioProvider } from "../../domain/repositories/IAudioProvider";
 
@@ -40,7 +40,6 @@ export class AudioProvider implements IAudioProvider {
           sort: 2,
           offset: 5,
           q: trackTitle,
-
         }
       });
 
@@ -48,26 +47,45 @@ export class AudioProvider implements IAudioProvider {
 
       if (!trackList.length) {
         throw new Error('Track not found');
-      };
+      }
 
       return trackList.slice(0, 3).map((trackItem, trackId) => {
         return {
           id: trackId + 1,
-          filename: `${ trackItem.artist } - ${ trackItem.title }`,
+          filename: `${trackItem.artist} - ${trackItem.title}`,
           url: trackItem.url,
         }
       });
 
     } catch (error) {
-      if (error instanceof Error && error.message === 'Track not found') {
-        throw error;
-      }
-
+      // Обработка ошибок Axios
       if (isAxiosError(error)) {
-        throw new Error(`Search failed: ${error.response?.data?.message || error.message}`);
+        const statusCode = error.response?.status;
+        const errorMessage = error.response?.data?.message || error.message;
+
+        if (statusCode) {
+          this.logger.error(`Axios error with status code: ${statusCode}, message: ${errorMessage}`);
+          throw new Error(`Request failed with status code ${statusCode}: ${errorMessage}`);
+        }
+
+        this.logger.error(`Axios error: ${errorMessage}`);
+        throw new Error(`Search failed: ${errorMessage}`);
       }
 
-      throw new Error(`Search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Обработка ошибок, возникающих при поиске
+      if (error instanceof Error) {
+        if (error.message === 'Track not found') {
+          this.logger.warn(`No track found for title: ${trackTitle}`);
+          throw error; // Прокидываем ошибку дальше
+        }
+
+        this.logger.error(`Unknown error: ${error.message}`);
+        throw new Error(`Search failed: ${error.message}`);
+      }
+
+      // Ловим все прочие ошибки
+      this.logger.error('An unknown error occurred');
+      throw new Error('Search failed: Unknown error');
     }
-  };
+  }
 }

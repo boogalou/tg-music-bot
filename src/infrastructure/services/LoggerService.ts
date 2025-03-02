@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
 import winston, { Logger } from 'winston';
-import { ILogger } from "./ILogger";
 import chalk from "chalk";
+
+import { ILogger } from "../interfaces/ILogger";
 
 @injectable()
 export class LoggerService implements ILogger {

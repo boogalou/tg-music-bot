@@ -1,27 +1,24 @@
 export const TYPES = {
 
+  IBot: Symbol.for('IBot'),
   ILogger: Symbol.for('ILogger'),
   IConfigService: Symbol.for('IConfigService'),
 
-
-  Bot: Symbol.for('Bot'),
-  BotService: Symbol.for('BotService'),
-  FindService: Symbol.for('FindService'),
-
   ICommand: Symbol.for('ICommand'),
+  IBotService: Symbol.for('IBotService'),
 
   // presentation/commands
-  StartCommand: Symbol.for('StartCommand'),
-  FindCommand: Symbol.for('FindCommand'),
+  IStartCommand: Symbol.for('IStartCommand'),
+  IFindCommand: Symbol.for('IFindCommand'),
 
   // infrastructure/providers
-  AudioProvider: Symbol.for('AudioProvider'),
-  LyricsProvider: Symbol.for('LyricsProvider'),
-  MusicVideoProvider: Symbol.for('MusicVideoProvider'),
+  IAudioProvider: Symbol.for('IAudioProvider'),
+  ILyricsProvider: Symbol.for('ILyricsProvider'),
+  IMusicVideoProvider: Symbol.for('IMusicVideoProvider'),
 
   // application/usecases
-  GetAudioTrackUseCase: Symbol.for('GetAudioTrackUseCase'),
-  GetLyricsUseCase: Symbol.for('GetLyricsUseCase'),
-  GetMusicVideoUseCase: Symbol.for('GetMusicVideoUseCase')
+  IGetAudioTrackUseCase: Symbol.for('IGetAudioTrackUseCase'),
+  IGetLyricsUseCase: Symbol.for('IGetLyricsUseCase'),
+  IGetMusicVideoUseCase: Symbol.for('IGetMusicVideoUseCase')
 } as const;
 

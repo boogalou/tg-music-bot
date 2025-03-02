@@ -1,5 +1,7 @@
-import {Scenes, Telegraf} from "telegraf";
+import { Telegraf } from "telegraf";
+
+import { IBotContext } from "../../infrastructure/interfaces/IBotContext";
 
 export interface ICommand {
-  handle(bot: Telegraf<Scenes.SceneContext>): void;
+  handle(bot: Telegraf<IBotContext>): void;
 }

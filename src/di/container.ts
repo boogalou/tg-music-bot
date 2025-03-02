@@ -1,11 +1,11 @@
 import { Container } from "inversify";
 
-import { Bot } from "../infrastructure/services/Bot";
+import { Bot } from "../infrastructure/telegram/Bot";
 import { TYPES } from "./types";
-import { ILogger } from "../infrastructure/services/config/logger/ILogger";
-import { LoggerService } from "../infrastructure/services/config/logger/LoggerService";
-import { IEnvConfigService } from "../infrastructure/services/config/env/IEnvConfigService";
-import { EnvConfigService } from "../infrastructure/services/config/env/EnvConfigService";
+import { ILogger } from "../infrastructure/interfaces/ILogger";
+import { LoggerService } from "../infrastructure/services/LoggerService";
+import { IEnvConfigService } from "../infrastructure/interfaces/IEnvConfigService";
+import { EnvConfigService } from "../infrastructure/services/EnvConfigService";
 import { BotService } from "../application/services/BotService";
 import { ICommand } from "../presentation/interfaces/ICommand";
 import { StartCommand } from "../presentation/commands/StartCommand";
@@ -22,33 +22,37 @@ import { ILyricsProvider } from "../domain/repositories/ILyricsProvider";
 import { IMusicVideoProvider } from "../domain/repositories/IMusicVideoProvider";
 import { LyricsProvider } from "../infrastructure/providers/LyricsProvider";
 import { MusicVideoProvider } from "../infrastructure/providers/MusicVideoProvider";
+import { IBotService } from "../infrastructure/interfaces/IBotService";
+import { IBot } from "../infrastructure/interfaces/IBot";
+
 
 
 const container = new Container();
+
 // Configuration
 container.bind<ILogger>(TYPES.ILogger).to(LoggerService);
 container.bind<IEnvConfigService>(TYPES.IConfigService).to(EnvConfigService);
 
 // Bot
-container.bind<Bot>(TYPES.Bot).to(Bot);
-container.bind<BotService>(TYPES.BotService).to(BotService);
+container.bind<IBot>(TYPES.IBot).to(Bot);
+container.bind<IBotService>(TYPES.IBotService).to(BotService);
 
 // UseCases
-container.bind<IGetAudioTrackUseCase>(TYPES.GetAudioTrackUseCase).to(GetAudioTrackUseCase);
-container.bind<IGetLyricsUseCase>(TYPES.GetLyricsUseCase).to(GetLyricsUseCase);
-container.bind<IGetMusicVideoUseCase>(TYPES.GetMusicVideoUseCase).to(GetMusicVideoUseCase);
+container.bind<IGetAudioTrackUseCase>(TYPES.IGetAudioTrackUseCase).to(GetAudioTrackUseCase);
+container.bind<IGetLyricsUseCase>(TYPES.IGetLyricsUseCase).to(GetLyricsUseCase);
+container.bind<IGetMusicVideoUseCase>(TYPES.IGetMusicVideoUseCase).to(GetMusicVideoUseCase);
 
 // Commands
-container.bind<ICommand>(TYPES.StartCommand).to(StartCommand);
-container.bind<ICommand>(TYPES.FindCommand).to(FindCommand);
+container.bind<ICommand>(TYPES.IStartCommand).to(StartCommand);
+container.bind<ICommand>(TYPES.IFindCommand).to(FindCommand);
 
 container.bind<ICommand[]>(TYPES.ICommand).toDynamicValue(() => [
-  container.get<ICommand>(TYPES.StartCommand),
-  container.get<ICommand>(TYPES.FindCommand),
+  container.get<ICommand>(TYPES.IStartCommand),
+  container.get<ICommand>(TYPES.IFindCommand),
 ]).inSingletonScope();
 
 // Providers
-container.bind<IAudioProvider>(TYPES.AudioProvider).to(AudioProvider);
-container.bind<ILyricsProvider>(TYPES.LyricsProvider).to(LyricsProvider);
-container.bind<IMusicVideoProvider>(TYPES.MusicVideoProvider).to(MusicVideoProvider);
+container.bind<IAudioProvider>(TYPES.IAudioProvider).to(AudioProvider);
+container.bind<ILyricsProvider>(TYPES.ILyricsProvider).to(LyricsProvider);
+container.bind<IMusicVideoProvider>(TYPES.IMusicVideoProvider).to(MusicVideoProvider);
 export { container };

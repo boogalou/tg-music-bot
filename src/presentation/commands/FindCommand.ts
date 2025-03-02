@@ -1,88 +1,131 @@
 import { inject, injectable } from "inversify";
 import { Markup, Telegraf } from "telegraf";
-import { SceneContext } from "telegraf/typings/scenes";
 import { message } from "telegraf/filters";
-
 
 import { ICommand } from "../interfaces/ICommand";
 import { TYPES } from "../../di/types";
-import { ILogger } from "../../infrastructure/services/config/logger/ILogger";
+import { ILogger } from "../../infrastructure/interfaces/ILogger";
 import { Track } from "../../domain/models/Track";
 import { IGetAudioTrackUseCase } from "../../application/interfaces/IGetAudioTrackUseCase";
 import { IGetLyricsUseCase } from "../../application/interfaces/IGetLyricsUseCase";
 import { IGetMusicVideoUseCase } from "../../application/interfaces/IGetMusicVideoUseCase";
-
+import { IBotContext } from "../../infrastructure/interfaces/IBotContext";
 
 @injectable()
 export class FindCommand implements ICommand {
+
   constructor(
     @inject(TYPES.ILogger)
     private readonly logger: ILogger,
-    @inject(TYPES.GetAudioTrackUseCase)
+    @inject(TYPES.IGetAudioTrackUseCase)
     private readonly getAudioTrackUseCase: IGetAudioTrackUseCase,
-    @inject(TYPES.GetLyricsUseCase)
+    @inject(TYPES.IGetLyricsUseCase)
     private readonly getLyricsUseCase: IGetLyricsUseCase,
-    @inject(TYPES.GetMusicVideoUseCase)
+    @inject(TYPES.IGetMusicVideoUseCase)
     private readonly getMusicVideoUseCase: IGetMusicVideoUseCase,
   ) {
   }
 
-  handle(bot: Telegraf<SceneContext>): void {
+  handle(bot: Telegraf<IBotContext>): void {
     bot.command('find', async (ctx) => {
+
+      if (!ctx.session) {
+        ctx.session = {
+          trackList: [],
+          selectedTrack: null,
+        };
+      }
+
       ctx.reply('Enter your request');
-
-      bot.on(message('text'), async (ctx) => {
-        const processingMessage = await ctx.reply('Поиск трека...')
-        const trackTitle = ctx.message.text;
-        const trackList: Track[] = await this.getAudioTrackUseCase.execute(trackTitle);
-
-        await ctx.deleteMessage(processingMessage.message_id);
-
-        const fileTitle = this.formatingFilename(trackList);
-
-        const buttons = trackList.map((track) => {
-          return Markup.button.callback(`${ track.id }`, `${ track.id }`);
-        });
-
-        await ctx.replyWithHTML(fileTitle, Markup.inlineKeyboard(buttons));
-
-        bot.action(buttons.map((btn) => btn.callback_data), async (ctx) => {
-          const trackId = Number(ctx.match[0]);
-          const selectedTrack = trackList.find((track) => track.id === trackId);
-
-          if (!selectedTrack) {
-            await ctx.reply('Track not found');
-          }
-
-          await ctx.replyWithAudio(
-            { url: selectedTrack?.url!, filename: selectedTrack?.filename },
-            Markup.inlineKeyboard([
-              Markup.button.callback('YouTube', `YouTube-${ selectedTrack?.filename }`),
-              Markup.button.callback('Song Lyrics', `Lyrics-${ selectedTrack?.filename }`),
-            ])
-          );
-
-          bot.action(/Lyrics-.+/, async (ctx) => {
-            const lyrics = await this.getLyricsUseCase.execute(selectedTrack?.filename!);
-            await ctx.replyWithHTML(`<pre>${ lyrics }</pre>`);
-          });
-
-          bot.action(/YouTube-.+/, async (ctx) => {
-            const videoId = await this.getMusicVideoUseCase.execute(selectedTrack?.filename!);
-            await ctx.reply('https://www.youtube.com/watch?v=' + videoId);
-          });
-        });
-      });
     });
 
+    bot.on(message('text'), async (ctx) => {
+      const processingMessage = await ctx.reply('Поиск трека...')
+      const trackTitle = ctx.message.text;
+      const trackList: Track[] = await this.getAudioTrackUseCase.execute(trackTitle);
+
+      if (!trackList) {
+        ctx.reply('Track not found')
+        return;
+      }
+
+
+      ctx.session.trackList = trackList;
+
+
+      await ctx.deleteMessage(processingMessage.message_id);
+
+      const fileTitle = this.formatingFilename(trackList);
+
+      const buttons = trackList.map((track) => {
+        return Markup.button.callback(`${ track.id }`, `track_${ track.id }`);
+      });
+
+      await ctx.replyWithHTML(fileTitle, Markup.inlineKeyboard(buttons));
+
+
+    });
+
+    bot.action(/track_\d+/, async (ctx) => {
+      const trackId = parseInt(ctx.match[0].replace('track_', ''), 10);
+      const trackList = ctx.session.trackList || [];
+
+      const selectedTrack = trackList.find((track) => track.id === trackId);
+
+      if (!selectedTrack) {
+        await ctx.reply('Track not found');
+        return;
+      }
+
+      ctx.session.selectedTrack = selectedTrack;
+
+      await ctx.replyWithAudio(
+        { url: selectedTrack?.url!, filename: selectedTrack?.filename },
+        Markup.inlineKeyboard([
+          Markup.button.callback('YouTube', `YouTube-${ selectedTrack?.filename }`),
+          Markup.button.callback('Song Lyrics', `Lyrics-${ selectedTrack?.filename }`),
+        ])
+      );
+    });
+
+    bot.action(/Lyrics-.+/, async (ctx) => {
+      const selectedTrack = ctx.session.selectedTrack;
+
+      try {
+        const lyrics = await this.getLyricsUseCase.execute(selectedTrack?.filename!);
+        if (!lyrics) {
+          await ctx.replyWithHTML(`<pre>Track not Found</pre>`);
+          return;
+        }
+        await ctx.replyWithHTML(`<pre>${ lyrics }</pre>`);
+
+      } catch (err: any) {
+        this.logger.error(`Error fetching lyrics: ${err.message}`);
+        await ctx.replyWithHTML(`<pre>Failed to fetch lyrics</pre>`);
+        return
+      }
+    });
+
+    bot.action(/YouTube-.+/, async (ctx) => {
+      const selectedTrack = ctx.session.selectedTrack;
+
+      try {
+        const videoId = await this.getMusicVideoUseCase.execute(selectedTrack?.filename!);
+        await ctx.reply('https://www.youtube.com/watch?v=' + videoId);
+      } catch (err: any) {
+        this.logger.error(`Error fetching lyrics: ${err.message}`);
+        await ctx.replyWithHTML(`<pre>Failed to fetch music video</pre>`);
+        return;
+      }
+    });
 
   }
 
 
   private formatingFilename(trackList: Track[]): string {
-    return trackList.map((track) => {
-      return `<strong>${track.id}. ${track.filename}</strong>\n`
-    }).join('');
+    return trackList
+      .map((track) => `<strong>${track.id}. ${track.filename}</strong>\n`)
+      .join('');
   }
 
 }

@@ -9,7 +9,7 @@ import { TYPES } from "../../di/types";
 @injectable()
 export class GetAudioTrackUseCase implements IGetAudioTrackUseCase{
   constructor(
-    @inject(TYPES.AudioProvider)
+    @inject(TYPES.IAudioProvider)
     private readonly provider: IAudioProvider,
   ) {}
 

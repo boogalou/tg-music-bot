@@ -7,7 +7,7 @@ import { TYPES } from "../../di/types";
 @injectable()
 export class GetLyricsUseCase implements IGetLyricsUseCase {
   constructor(
-    @inject(TYPES.LyricsProvider)
+    @inject(TYPES.ILyricsProvider)
     private readonly provider: ILyricsProvider) {}
 
    async execute(trackTitle: string): Promise<string> {

@@ -1,8 +1,8 @@
 import { config, DotenvParseOutput } from "dotenv";
-import { IEnvConfigService } from "./IEnvConfigService";
+import { IEnvConfigService } from "../interfaces/IEnvConfigService";
 import { inject, injectable } from "inversify";
-import { ILogger } from "../logger/ILogger";
-import { TYPES } from "../../../../di/types";
+import { ILogger } from "../interfaces/ILogger";
+import { TYPES } from "../../di/types";
 
 @injectable()
 export class EnvConfigService implements IEnvConfigService {
