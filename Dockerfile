@@ -12,7 +12,6 @@ WORKDIR /home/node/app
 COPY --from=deps /home/node/app/node_modules ./node_modules
 COPY . .
 RUN pnpm run build
-ENV NODE_ENV production
 RUN pnpm install --frozen-lockfile --prod
 
 FROM base AS runner
