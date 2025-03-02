@@ -1,4 +1,5 @@
 import { config, DotenvParseOutput } from "dotenv";
+
 import { IEnvConfigService } from "../interfaces/IEnvConfigService";
 import { inject, injectable } from "inversify";
 import { ILogger } from "../interfaces/ILogger";
@@ -6,16 +7,15 @@ import { TYPES } from "../../di/types";
 
 @injectable()
 export class EnvConfigService implements IEnvConfigService {
-  private readonly config: DotenvParseOutput;
+  private readonly config: DotenvParseOutput | NodeJS.ProcessEnv;
 
   constructor(
     @inject(TYPES.ILogger) private readonly logger: ILogger
   ) {
     const { error, parsed } = config();
+
     if (error || !parsed) {
-      const errorMessage: string = '.env file not found or empty';
-      this.logger.error(errorMessage);
-      throw new Error(errorMessage);
+      this.logger.warn('.env file not found or empty, falling back to environment variables.');
     }
 
     this.config = parsed || process.env;
