@@ -10,9 +10,11 @@ import { IGetAudioTrackUseCase } from "../../application/interfaces/IGetAudioTra
 import { IGetLyricsUseCase } from "../../application/interfaces/IGetLyricsUseCase";
 import { IGetMusicVideoUseCase } from "../../application/interfaces/IGetMusicVideoUseCase";
 import { IBotContext } from "../../infrastructure/interfaces/IBotContext";
+import axios from "axios";
 
 @injectable()
 export class FindCommand implements ICommand {
+  private readonly MAX_AUDIO_SIZE = 50 * 1024 * 1024;
 
   constructor(
     @inject(TYPES.ILogger)
@@ -40,6 +42,7 @@ export class FindCommand implements ICommand {
     });
 
     bot.on(message('text'), async (ctx) => {
+      try {
       const processingMessage = await ctx.reply('Поиск трека...')
       const trackTitle = ctx.message.text;
       const trackList: Track[] = await this.getAudioTrackUseCase.execute(trackTitle);
@@ -49,12 +52,9 @@ export class FindCommand implements ICommand {
         return;
       }
 
-
       ctx.session.trackList = trackList;
 
-
       await ctx.deleteMessage(processingMessage.message_id);
-
       const fileTitle = this.formatingFilename(trackList);
 
       const buttons = trackList.map((track) => {
@@ -63,6 +63,11 @@ export class FindCommand implements ICommand {
 
       await ctx.replyWithHTML(fileTitle, Markup.inlineKeyboard(buttons));
 
+    } catch (err: any) {
+      this.logger.error(err.message);
+      await ctx.reply('Oops something went wrong');
+      return;
+    }
 
     });
 
@@ -79,13 +84,24 @@ export class FindCommand implements ICommand {
 
       ctx.session.selectedTrack = selectedTrack;
 
-      await ctx.replyWithAudio(
-        { url: selectedTrack?.url!, filename: selectedTrack?.filename },
-        Markup.inlineKeyboard([
-          Markup.button.callback('YouTube', `YouTube-${ selectedTrack?.filename }`),
-          Markup.button.callback('Song Lyrics', `Lyrics-${ selectedTrack?.filename }`),
-        ])
-      );
+      try {
+        const fileSize = await this.getFileSize(selectedTrack.url);
+        if (fileSize > this.MAX_AUDIO_SIZE) {
+          await ctx.reply('The file is too large to send.');
+          return;
+        }
+
+        await ctx.replyWithAudio(
+          { url: selectedTrack.url, filename: selectedTrack.filename },
+          Markup.inlineKeyboard([
+            Markup.button.callback('YouTube', `YouTube-${selectedTrack.filename}`),
+            Markup.button.callback('Song Lyrics', `Lyrics-${selectedTrack.filename}`),
+          ])
+        );
+      } catch (err: any) {
+        this.logger.error(`Error checking file size: ${err.message}`);
+        await ctx.reply('Error checking file size.');
+      }
     });
 
     bot.action(/Lyrics-.+/, async (ctx) => {
@@ -126,6 +142,15 @@ export class FindCommand implements ICommand {
     return trackList
       .map((track) => `<strong>${track.id}. ${track.filename}</strong>\n`)
       .join('');
+  }
+
+  private async getFileSize(url: string) {
+    try {
+      const response = await axios.head(url);
+      return parseInt(response.headers['content-length'], 10);
+    } catch (error) {
+      throw new Error('Unable to retrieve file size');
+    }
   }
 
 }
