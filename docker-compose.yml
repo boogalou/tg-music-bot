@@ -5,13 +5,8 @@ services:
       dockerfile: Dockerfile
     restart: always
     container_name: tg-music-bot
-    environment:
-      BOT_TOKEN_PROD: ${BOT_TOKEN_PROD}
-      BOT_TOKEN_DEV: ${BOT_TOKEN_DEV}
-      KATE_TOKEN: ${KATE_TOKEN}
-      KATE_USER_AGENT: ${KATE_USER_AGENT}
-      MUSIXMATCH_TOKEN: ${MUSIXMATCH_TOKEN}
-      YOUTUBE_TOKEN: ${YOUTUBE_TOKEN}
+    env_file:
+      - .env
     networks:
       - tg-bot-network
     volumes:

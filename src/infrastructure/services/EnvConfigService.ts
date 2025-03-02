@@ -18,7 +18,7 @@ export class EnvConfigService implements IEnvConfigService {
       throw new Error(errorMessage);
     }
 
-    this.config = parsed;
+    this.config = parsed || process.env;
   }
 
   public get(key: string): string {
