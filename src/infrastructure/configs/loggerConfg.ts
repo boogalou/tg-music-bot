@@ -5,7 +5,7 @@ import chalk from "chalk";
 
 const jsonFormat = winston.format.combine(
   winston.format.timestamp({
-    format: 'HH:MM:ss DD.MM.YYYY',
+    format: 'HH:mm:ss DD.MM.YYYY',
   }),
   winston.format.errors({ stack: true }),
   winston.format.splat(),
@@ -33,6 +33,7 @@ export const loggerConfig: LoggerOptions = {
     }),
     new winston.transports.Console({
       format: winston.format.combine(
+        winston.format.timestamp({ format: 'HH:mm:ss DD.MM.YYYY' }),
         winston.format.simple(),
         winston.format.printf(({ level, message, timestamp }) => {
           let coloredLevel = level;
@@ -40,26 +41,26 @@ export const loggerConfig: LoggerOptions = {
           let coloredTimestamp = timestamp;
 
           switch (level) {
-            case 'info':
-              coloredLevel = chalk.bold.bgHex('#91C483').hex('#525E75')(level);
-              coloredMessage = chalk.hex('#A1B57D')(message);
-              coloredTimestamp = chalk.hex('#A1B57D')(timestamp);
+            case "info":
+              coloredLevel = `${ chalk.bold.bgHex("#91C483").hex("#525E75")(` ${ level } `) }`;
+              coloredMessage = chalk.hex("#A1B57D")(`${ message }`);
+              coloredTimestamp = chalk.hex("#A1B57D")(timestamp);
               break;
 
-            case 'warn':
-              coloredLevel = chalk.bold.bgHex('#E9B824').hex('#3D3B40')(level);
-              coloredMessage = chalk.hex('#FFC85C')(message);
-              coloredTimestamp = chalk.hex('#FFC85C')(timestamp);
+            case "warn":
+              coloredLevel = chalk.bold.bgHex("#E9B824").hex("#3D3B40")(` ${ level } `);
+              coloredMessage = chalk.hex("#FFC85C")(message);
+              coloredTimestamp = chalk.hex("#FFC85C")(timestamp);
               break;
 
-            case 'error':
-              coloredLevel = chalk.bold.bgHex('#EF6262').hex('#2D2727')(level);
-              coloredMessage = chalk.hex('#E96479')(message);
-              coloredTimestamp = chalk.hex('#E96479')(timestamp);
+            case "error":
+              coloredLevel = chalk.bold.bgHex("#EF6262").hex("#2D2727")(` ${ level } `);
+              coloredMessage = chalk.hex("#E96479")(message);
+              coloredTimestamp = chalk.hex("#E96479")(timestamp);
               break;
 
             default:
-              break;
+              break
           }
 
           return `${coloredLevel} ${coloredTimestamp}: ${coloredMessage}, `;

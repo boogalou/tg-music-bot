@@ -30,7 +30,7 @@ import { IBot } from "../infrastructure/interfaces/IBot";
 const container = new Container();
 
 // Configuration
-container.bind<ILogger>(TYPES.ILogger).to(LoggerService);
+container.bind<ILogger>(TYPES.ILogger).to(LoggerService).inSingletonScope();
 container.bind<IEnvConfigService>(TYPES.IConfigService).to(EnvConfigService);
 
 // Bot
