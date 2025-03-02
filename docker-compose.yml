@@ -9,7 +9,12 @@ services:
       - .env
     networks:
       - tg-bot-network
+    volumes:
+    - ./logs:/home/node/app/logs
 
 networks:
   tg-bot-network:
     driver: bridge
+
+volumes:
+  logs:
