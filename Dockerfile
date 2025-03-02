@@ -20,6 +20,7 @@ RUN mkdir -p /home/node/app/logs
 COPY --from=builder /home/node/app/package.json ./
 COPY --from=builder /home/node/app/dist ./dist
 COPY --from=builder /home/node/app/node_modules ./node_modules
+COPY --from=builder /home/node/app/.env ./.env
 RUN mkdir -p logs && chown -R node:node logs
 USER node
 CMD ["node", "dist/main.js"]
